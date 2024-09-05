@@ -3,19 +3,44 @@ easy install of simtbx nanoBragg
 
 # Install for Linux
 
-This has been tested on Debian 12 (bookworm). It will likely work on intel macs, but unsure about M1 etc.
+This has been tested on Debian 12 (bookworm) and SUSE 15. It will likely work on intel macs, but unsure about M1 etc.
+
+#### Getting conda
 
 ```
-conda create -n simtbx conda-forge::cctbx-base python=3.9
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash ./Miniconda3-latest-Linux-x86_64.sh -b -u -p $PWD/simforge
+source simforge/etc/profile.d/conda.sh
+```
+
+#### Building
+
+```
+conda create -n simtbx conda-forge::cctbx-base python=3.9 -y
 conda activate simtbx
-conda install conda-forge::dxtbx
+conda install conda-forge::dxtbx -y
 git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
 cd easyBragg
 ./build.sh
 export PYTHONPATH=$PWD/simtbx_project:$PWD/ext
 ```
 
-Note, the last command should be expanded and done at login.
+Note, at each fresh login one should source conda, activate simtbx env, and set `PYTHONPATH`. Try an install script:
+
+<details>
+  <summary>`setup_ezbragg.sh`</summary>
+
+```
+SIMFORGE=/path/to/simforge
+EASYBRAGG=/path/to/easyBragg
+source $SIMFORGE/etc/profile.d/conda.sh
+conda activate simtbx
+export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
+```
+
+Hence at login run `source ~/setup_ezbragg.sh`
+
+</details>
 
 Try ```python example.py``` to display a simulated pattern.
 
