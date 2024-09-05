@@ -1,5 +1,5 @@
 # easyBragg
-easy install of simtbx nanoBragg
+An easy install of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
 
 # Install for Linux
 
@@ -25,7 +25,7 @@ cd easyBragg
 export PYTHONPATH=$PWD/simtbx_project:$PWD/ext
 ```
 
-Note, at each fresh login one should source conda, activate simtbx env, and set `PYTHONPATH`. Try an install script:
+Note, at each fresh login one should source conda, activate simtbx env, and set `PYTHONPATH`. For that, create an env script:
 
 <details>
   <summary>`setup_ezbragg.sh`</summary>
@@ -38,11 +38,11 @@ conda activate simtbx
 export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 ```
 
-Hence at login run `source ~/setup_ezbragg.sh`
+Hence, at login run `source /path/to/setup_ezbragg.sh`.
 
 </details>
 
-Try ```python example.py``` to display a simulated pattern.
+Try ```python example.py``` to display a simulated pattern:
 
 ![example](https://smb.slac.stanford.edu/~dermen/simtbx_example.png)
 
