@@ -21,8 +21,14 @@ conda activate simtbx
 conda install conda-forge::dxtbx -y
 git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
 cd easyBragg
-./build.sh
+CC=g++ ./build.sh
 export PYTHONPATH=$PWD/simtbx_project:$PWD/ext
+```
+
+Alternatively, for CUDA builds, if nvcc is available, do 
+
+```
+CC=nvcc ./build.sh
 ```
 
 Note, at each fresh login one should source conda, activate simtbx env, and set `PYTHONPATH`. For that, create an env script:
@@ -44,10 +50,15 @@ Hence, at login run `source /path/to/setup_ezbragg.sh`.
 
 Try ```python example.py``` to display a simulated pattern:
 
-![example](https://smb.slac.stanford.edu/~dermen/simtbx_example.png)
+![example](https://smb.slac.stanford.edu/~dermen/noise_img.png)
 
-Some of the nanoBragg tests can be run, for example:
+If you built the CUDA version (by setting `CC=nvcc` for `build.sh` script), then you will see an additional image displayed, showing the CPU and GPU kernel results are identical, but the GPU kernel runs faster (~100x, depending on the number of pixels, oversample-rate, number of mosaic domains, and number of sources):
+
+![example2](https://smb.slac.stanford.edu/~dermen/cpu_vs_gpu.png)
+
+Most of the nanoBragg tests can be run, for example:
 
 ```
 python simtbx_project/simtbx/nanoBragg/tst_nanoBragg_cbf_write.py
+python simtbx_project/simtbx/nanoBragg/tst_gauss_argchk.py GPU
 ```
