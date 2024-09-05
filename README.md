@@ -19,6 +19,8 @@ Note, the last command should be expanded and done at login.
 
 Try ```python example.py``` to display a simulated pattern.
 
+![example](https://smb.slac.stanford.edu/~dermen/simtbx_example.png)
+
 Some of the nanoBragg tests can be run, for example:
 
 ```
