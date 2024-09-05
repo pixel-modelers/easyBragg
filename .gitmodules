@@ -1,0 +1,6 @@
+[submodule "simtbx_project"]
+	path = simtbx_project
+	url = https://github.com/pixel-modelers/simtbx_project.git
+[submodule "simtbx_boost"]
+	path = simtbx_boost
+	url = https://github.com/pixel-modelers/simtbx_boost.git
