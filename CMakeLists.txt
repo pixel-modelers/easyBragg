@@ -62,15 +62,6 @@ add_library(nanoBragg_ext OBJECT ${NANOBRAGG}/nanoBragg_ext.cpp)
 target_include_directories(nanoBragg PRIVATE ${INCS})
 target_include_directories(nanoBragg_ext PRIVATE ${INCS})
 
-target_compile_options(nanoBragg PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
-    -O3
-    -fPIC
-    >)
-target_compile_options(nanoBragg_ext PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
-    -O3
-    -fPIC
-    >)
-
 # suppress compiler warnings (to see warnings, execute the build.sh script)
 add_definitions(-w)
 
@@ -79,7 +70,6 @@ add_library(simtbx_nanoBragg_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
     enable_language(CUDA)
-    message(STATUS "CMAKE_CUDA_COMPILER = ${CMAKE_CUDA_COMPILER}")
     find_library(CUDART_LIB REQUIRED NAMES cudart HINTS "${CUDAToolkit_LIBRARY_DIR}")
     message(">> CUDART library found: ${CUDART_LIB}")
     set(LIBS 
@@ -87,6 +77,7 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
         ${CUDART_LIB}
     )
 
+    # gencode flags
     set(codes "")
     set(SMlist 50;52;60;61;70;75;80;86;89;90)
     foreach(sm IN LISTS SMlist) 
@@ -94,27 +85,20 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
     endforeach()
     message(">> gencodes=${codes}")
 
-    # two new objects
+    # two new objects for cuda support
     add_library(nanoBraggCUDA OBJECT ${NANOBRAGG}/nanoBraggCUDA.cu)
     add_library(nanoBragg_cuda OBJECT ${NANOBRAGG}/nanoBragg_cuda.cpp)
-    # add the includes
     target_include_directories(nanoBraggCUDA PRIVATE ${INCS})
     target_include_directories(nanoBragg_cuda PRIVATE ${INCS})
     
     # nvcc options
     target_compile_options(nanoBraggCUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
-        --compiler-options=-fPIC
         --compiler-options=-lstdc++
         --compiler-options=-O3
-        --expt-relaxed-constexpr
-        >)
-    target_compile_options(nanoBraggCUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --compiler-options=-fPIC
-        --compiler-options=-lstdc++
-        --compiler-options=-O3
         --expt-relaxed-constexpr
         >)
-
+    # had to add gencodes like this do to weird cmake issue
     target_compile_options(nanoBraggCUDA PRIVATE
       "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:${codes}>"
       )
@@ -129,8 +113,4 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
 else()
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS})
 endif()
-
-#message(INCS: "${INCS}")
-#message(LIBS: "${LIBS}")
-
 
