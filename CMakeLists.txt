@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set (CMAKE_CXX_STANDARD 11)
 
 # Get Python version information
@@ -48,7 +49,9 @@ set(BOOST_LIBS
 )
 message(">> Boost libraries found: ${BOOST_LIBS}")
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
+find_library(PY_LIB REQUIRED NAMES python${PYMAJ}.${PYMIN} HINTS "${CONDA}/lib")
 message(">> CCTBX library found: ${CCTBX_LIB}")
+message(">> PYTHON library found: ${PY_LIB}")
 
 set(INCS
   ${SIMTBX_PROJ}
@@ -60,6 +63,7 @@ set(INCS
 set(LIBS
   ${BOOST_LIBS}
   ${CCTBX_LIB}
+  ${PY_LIB}
 )
 
 add_compile_options(
