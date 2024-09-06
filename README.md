@@ -16,9 +16,8 @@ source simforge/etc/profile.d/conda.sh
 ```
 mamba create -n simtbx -c conda-forge cctbx-base libboost-devel libboost-python-devel dxtbx python=3.9 -y
 conda activate simtbx
-git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
+git clone -b arm64 --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
 cd easyBragg
-git checkout arm64
 mkdir build
 cd build
 cmake ..
