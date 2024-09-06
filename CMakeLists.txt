@@ -2,7 +2,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set (CMAKE_CXX_STANDARD 11)
 
 # Get Python version information
