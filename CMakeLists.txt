@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-
+# Only tested so far on cmake version 3.26 
+cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
+
 
 # Get Python version information
 execute_process(
@@ -16,25 +17,24 @@ execute_process(
 )
 
 # Define variables
+# cuda root folder:
 if (NOT DEFINED CUDAToolkit_ROOT)
     set(CUDAToolkit_ROOT "/usr/local/cuda")
 endif()
+# easyBragg github folder:
 if (NOT DEFINED EZBRAGG)
     set(EZBRAGG "..")
-endif()
-if (NOT DEFINED BOOST_INCLUDEDIR)
-    set(BOOST_INCLUDEDIR "../simtbx_boost")
 endif()
 
 set(CONDA $ENV{CONDA_PREFIX})
 set(PYNUM "${PYMAJ}${PYMIN}")
 set(PY "python${PYMAJ}.${PYMIN}")
-set(SIMTBX_BOOST "${EZBRAGG}/simtbx_boost")
+set(BOOST_INCLUDEDIR "${EZBRAGG}/simtbx_boost")
 set(SIMTBX_PROJ "${EZBRAGG}/simtbx_project")
 set(NANOBRAGG "${SIMTBX_PROJ}/simtbx/nanoBragg")
-set(CMAKE_SHARED_LIBRARY_PREFIX "")
 message(">> NANOBRAGG FOLDER: ${NANOBRAGG}")
 
+cmake_policy(SET CMP0074 NEW)
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED COMPONENTS python${PYNUM} system numpy${PYNUM})
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
@@ -42,7 +42,7 @@ message(">> CCTBX library found: ${CCTBX_LIB}")
 
 set(INCS
   ${CONDA}/lib/${PY}/site-packages
-  ${SIMTBX_BOOST}
+  ${BOOST_INCLUDEDIR}
   ${CONDA}/include
   ${CONDA}/include/${PY}
   ${SIMTBX_PROJ}
@@ -66,6 +66,7 @@ target_include_directories(nanoBragg_ext PRIVATE ${INCS})
 add_definitions(-w)
 
 # the python extension module
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_library(simtbx_nanoBragg_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
@@ -76,14 +77,6 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
         ${LIBS}
         ${CUDART_LIB}
     )
-
-    # gencode flags
-    set(codes "")
-    set(SMlist 50;52;60;61;70;75;80;86;89;90)
-    foreach(sm IN LISTS SMlist) 
-      set(codes "${codes}-gencode arch=compute_${sm},code=sm_${sm} ")
-    endforeach()
-    message(">> gencodes=${codes}")
 
     # two new objects for cuda support
     add_library(nanoBraggCUDA OBJECT ${NANOBRAGG}/nanoBraggCUDA.cu)
@@ -98,11 +91,13 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
         --compiler-options=-fPIC
         --expt-relaxed-constexpr
         >)
-    # had to add gencodes like this do to weird cmake issue
-    target_compile_options(nanoBraggCUDA PRIVATE
-      "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:${codes}>"
-      )
+
+    # cuda gencodes:
+    set_target_properties(nanoBraggCUDA PROPERTIES CUDA_ARCHITECTURES "50;52;60;61;70;75;80;86;89;90")
+    # this silenced a warning .. not sure if its necessary though:
+    set_target_properties(simtbx_nanoBragg_ext PROPERTIES CUDA_ARCHITECTURES "50;52;60;61;70;75;80;86;89;90")
     
+    # preprocessor macros in nanoBragg to build CUDA
     add_compile_definitions(
         HAVE_NANOBRAGG_SPOTS_CUDA=1
         CUDAREAL=double
