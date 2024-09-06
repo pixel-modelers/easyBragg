@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
+set (CMAKE_CXX_STANDARD 11)
 
 # Get Python version information
 execute_process(
@@ -23,33 +24,41 @@ if (NOT DEFINED CUDAToolkit_ROOT)
 endif()
 # easyBragg github folder:
 if (NOT DEFINED EZBRAGG)
-    set(EZBRAGG "..")
+    get_filename_component(EZBRAGG ".." REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
 endif()
 
+message(">> EZBRAGG: ${EZBRAGG}")
 set(CONDA $ENV{CONDA_PREFIX})
 set(PYNUM "${PYMAJ}${PYMIN}")
 set(PY "python${PYMAJ}.${PYMIN}")
-set(BOOST_INCLUDEDIR "${EZBRAGG}/simtbx_boost")
 set(SIMTBX_PROJ "${EZBRAGG}/simtbx_project")
 set(NANOBRAGG "${SIMTBX_PROJ}/simtbx/nanoBragg")
 message(">> NANOBRAGG FOLDER: ${NANOBRAGG}")
+message(">> SIMTBX PROJECT: ${SIMTBX_PROJ}")
 
 cmake_policy(SET CMP0074 NEW)
 find_package(CUDAToolkit)
-find_package(Boost REQUIRED COMPONENTS python${PYNUM} system numpy${PYNUM})
+find_library(BOOST_PY REQUIRED NAMES boost_python${PYNUM} HINTS "${CONDA}/lib")
+find_library(BOOST_SYS REQUIRED NAMES boost_system HINTS "${CONDA}/lib")
+find_library(BOOST_NP REQUIRED NAMES boost_numpy${PYNUM} HINTS "${CONDA}/lib")
+set(BOOST_LIBS
+    ${BOOST_PY}
+    ${BOOST_SYS}
+    ${BOOST_NP}
+)
+message(">> Boost libraries found: ${BOOST_LIBS}")
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
 message(">> CCTBX library found: ${CCTBX_LIB}")
 
 set(INCS
+  ${SIMTBX_PROJ}
   ${CONDA}/lib/${PY}/site-packages
-  ${BOOST_INCLUDEDIR}
   ${CONDA}/include
   ${CONDA}/include/${PY}
-  ${SIMTBX_PROJ}
 )
 
 set(LIBS
-  ${Boost_LIBRARIES}
+  ${BOOST_LIBS}
   ${CCTBX_LIB}
 )
 
