@@ -1,9 +1,33 @@
 # easyBragg
 An easy install of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
 
+# Install for MAC M1
+
+#### Getting mamba
+
+```
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
+bash ./Miniforge3-MacOSX-arm64.sh -b -u -p $PWD/simforge
+source simforge/etc/profile.d/conda.sh 
+```
+
+#### Create env and Build
+
+```
+mamba create -n simtbx -c conda-forge cctbx-base libboost-devel libboost-python-devel dxtbx python=3.9 -y
+conda activate simtbx
+git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
+cd easyBragg
+git checkout arm64
+mkdir build
+cd build
+cmake ..
+make
+```
+
 # Install for Linux
 
-This has been tested on Debian 12 (bookworm) and SUSE 15. It will likely work on intel macs, but unsure about M1 etc.
+This has been tested on Debian 12 (bookworm) and SUSE 15.
 
 #### Getting conda
 
@@ -13,7 +37,7 @@ bash ./Miniconda3-latest-Linux-x86_64.sh -b -u -p $PWD/simforge
 source simforge/etc/profile.d/conda.sh
 ```
 
-#### Building
+#### Create env and Build
 
 ```
 conda create -n simtbx conda-forge::cctbx-base python=3.9 -y
