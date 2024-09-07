@@ -1,6 +1,7 @@
+<center>
+
 # easyBragg
 
-<center>
 
 ----
 **An east-to-build version of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.**
@@ -49,7 +50,7 @@ Note, use conda to activate the env.
 
 ### Part 3: Download sources and build
 
-Note, build uses `cmake`. If its not already in your path, simply install it with mamba: 
+This build uses `cmake`. If its not already in your path, simply install it with mamba: 
 
 ```
 mamba install cmake
@@ -128,6 +129,12 @@ For folks using the x86_64 conda packages on an M1 mac, try
 
 ```
 cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+```
+
+For non-standard CUDA install locations, use
+
+```
+cmake -DCUDAToolkit_ROOT=/path/to/some/cuda ..
 ```
 
 <a name="testing_easybragg"></a>
