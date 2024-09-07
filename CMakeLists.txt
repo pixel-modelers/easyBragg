@@ -124,7 +124,11 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
 
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext nanoBraggCUDA nanoBragg_cuda ${LIBS})
 else()
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS} "-undefined dynamic_lookup")
+  else()
+    target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS})
+  endif()
 endif()
 
 set(CMAKE_INSTALL_PREFIX "${EZBRAGG}")
