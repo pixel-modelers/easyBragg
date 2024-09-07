@@ -1,4 +1,4 @@
-# Only tested so far on cmake version 3.26 
+
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
@@ -48,9 +48,7 @@ set(BOOST_LIBS
 )
 message(">> Boost libraries found: ${BOOST_LIBS}")
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
-find_library(PY_LIB REQUIRED NAMES python${PYMAJ}.${PYMIN} HINTS "${CONDA}/lib")
 message(">> CCTBX library found: ${CCTBX_LIB}")
-message(">> PYTHON library found: ${PY_LIB}")
 
 set(INCS
   ${SIMTBX_PROJ}
@@ -59,15 +57,22 @@ set(INCS
   ${CONDA}/include/${PY}
 )
 
+if (DEFINED SIMTBX_BOOST)
+    set(INCS
+      ${INCS}
+      ${SIMTBX_BOOST}
+    )
+endif()
+
 set(LIBS
   ${BOOST_LIBS}
   ${CCTBX_LIB}
-  ${PY_LIB}
 )
 
 add_compile_options(
     "$<$<COMPILE_LANGUAGE:CXX>:-O3;-fPIC>"
 )
+
 
 add_library(nanoBragg OBJECT ${NANOBRAGG}/nanoBragg.cpp)
 add_library(nanoBragg_ext OBJECT ${NANOBRAGG}/nanoBragg_ext.cpp)
@@ -79,6 +84,7 @@ add_definitions(-w)
 
 # the python extension module
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
+set(CMAKE_SHARED_LIBRARY_SUFFIX_CXX ".so")
 add_library(simtbx_nanoBragg_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
@@ -118,6 +124,10 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
 
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext nanoBraggCUDA nanoBragg_cuda ${LIBS})
 else()
-    target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS})
+    target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS} "-undefined dynamic_lookup")
 endif()
+
+set(CMAKE_INSTALL_PREFIX "${EZBRAGG}")
+message(">> INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
+install(TARGETS simtbx_nanoBragg_ext DESTINATION ext)
 

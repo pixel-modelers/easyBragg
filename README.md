@@ -1,9 +1,13 @@
 # easyBragg
 An easy install of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
 
-# Install for MAC M1
+# Install
 
-#### Getting mamba
+This has been tested on Debian 12 (bookworm), SUSE 15, and Sonomo 14 (Apple M1).
+
+### Part 1: Download mamba
+
+##### mamba for M1 Mac:
 
 ```
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
@@ -11,50 +15,69 @@ bash ./Miniforge3-MacOSX-arm64.sh -b -u -p $PWD/simforge
 source simforge/etc/profile.d/conda.sh 
 ```
 
-#### Create env and Build
+Note there is also an x86_64 version of mamba for M1. If you use this, you will need to set a special cmake flag below. 
+
+##### mamba Linux:
+
+```
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash ./Miniforge3-MacOSX-arm64.sh -b -u -p $PWD/simforge
+source simforge/etc/profile.d/conda.sh 
+```
+
+### Part 2: Get cctbx, dxtbx, and boost headers
 
 ```
 mamba create -n simtbx -c conda-forge cctbx-base libboost-devel libboost-python-devel dxtbx python=3.9 -y
 conda activate simtbx
-git clone -b arm64 --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
+```
+
+Note, use conda to activate the env.
+
+### Part 3: Download sources and build
+
+Note, build uses `cmake` which can be installed in the conda environment, or with [homebrew](https://formulae.brew.sh/formula/cmake) if using mac. 
+
+```
+mamba install cmake
+```
+
+For CUDA builders, set up the [typical CUDA env](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#environment-setup), and ensure nvcc is in your path.
+
+
+<details>
+  <summary>`typical_cuda_setup.sh`</summary>
+
+```
+export CUDA_HOME=/usr/local/cuda/
+export CUDA_PATH=$CUDA_HOME
+export PATH=$PATH:${CUDA_HOME}/bin
+export LD_LIBRARY_PATH=${CUDA_HOME}/lib64
+```
+</details>
+
+Then get the sources and install. 
+
+```
+git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
 cd easyBragg
 mkdir build
 cd build
 cmake ..
 make
+make install
 ```
 
-# Install for Linux
-
-This has been tested on Debian 12 (bookworm) and SUSE 15.
-
-#### Getting conda
+To use the env, for now, use PYTHONPATH
 
 ```
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash ./Miniconda3-latest-Linux-x86_64.sh -b -u -p $PWD/simforge
-source simforge/etc/profile.d/conda.sh
+export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 ```
 
-#### Create env and Build
+where `$EASYBRAGG` should be the absolute path to the `easyBragg` repository. 
 
-```
-conda create -n simtbx conda-forge::cctbx-base python=3.9 -y
-conda activate simtbx
-conda install conda-forge::dxtbx -y
-git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
-cd easyBragg
-CC=g++ ./build.sh
-export PYTHONPATH=$PWD/simtbx_project:$PWD/ext
-```
 
-Alternatively, for CUDA builds, if nvcc is available, do 
-
-```
-CC=nvcc ./build.sh
-```
-
-Note, at each fresh login one should source conda, activate simtbx env, and set `PYTHONPATH`. For that, create an env script:
+Note, at each fresh login one should activate the simtbx env and set `PYTHONPATH`. For that, create an env script:
 
 <details>
   <summary>`setup_ezbragg.sh`</summary>
@@ -71,11 +94,35 @@ Hence, at login run `source /path/to/setup_ezbragg.sh`.
 
 </details>
 
+### Install notes
+
+For folks who dont only use conda (not mamba), try installing in steps, as dependency resolution seems faster that way:
+
+```
+conda create -n conda-forge::cctbx-base python=3.9 -y
+conda install conda-forge::dxtbx -y
+```
+
+One can try using the cctbx/boost headers as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel`. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
+
+```
+cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
+```
+
+For folks using the x86_64 conda packages on an M1 mac, try
+
+```
+cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+```
+
+### Testing the build
+
+
 Try ```python example.py``` to display a simulated pattern:
 
 ![example](https://smb.slac.stanford.edu/~dermen/noise_img.png)
 
-If you built the CUDA version (by setting `CC=nvcc` for `build.sh` script), then you will see an additional image displayed, showing the CPU and GPU kernel results are identical, but the GPU kernel runs faster (~100x, depending on the number of pixels, oversample-rate, number of mosaic domains, and number of sources):
+If you ran cmake in a CUDA environment, then you will see an additional image displayed, showing the CPU and GPU kernel results are identical, but the GPU kernel runs faster (~100x, depending on the number of pixels, oversample-rate, number of mosaic domains, and number of sources):
 
 ![example2](https://smb.slac.stanford.edu/~dermen/cpu_vs_gpu.png)
 

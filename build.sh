@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# NOTE, this script is for debug purposes. Try using cmake
+#
 # Set compiler to nvcc for a CUDA build, and g++ for a CPU-only build
 #CC=nvcc
 
@@ -11,11 +12,10 @@ SIMTBX_BOOST=simtbx_boost
 SIMTBX_PROJ=simtbx_project
 NANOBRAGG=${SIMTBX_PROJ}/simtbx/nanoBragg
 
-
 LIBS="-L${CONDA_PREFIX}/lib"
 INCS="-I${CONDA_PREFIX}/lib/${PY}/site-packages -I${SIMTBX_BOOST} -I${CONDA_PREFIX}/include -I ${CONDA_PREFIX}/include/${PY} -I${SIMTBX_PROJ}"
-libs="-lboost_python${PYNUM} -lboost_system -lboost_numpy${PYNUM} -lstdc++ -lcctbx"
-flags="-O3 -fPIC"
+libs="-lboost_python${PYNUM} -lboost_system -lboost_numpy${PYNUM} -lstdc++ -lcctbx -undefined dynamic_lookup"
+flags="-O3 -fPIC -std=c++14"
 
 mkdir -p build
 mkdir -p ext
@@ -44,3 +44,6 @@ targets="${targets} build/nanoBragg.o build/nanoBragg_ext.o"
 
 # link
 g++ -shared $targets $LIBS $libs -o ext/simtbx_nanoBragg_ext.so
+# for M1 with arm64 conda-packages:
+#g++ -arch arm64 -shared $targets $LIBS $libs -o ext/simtbx_nanoBragg_ext.so
+#
