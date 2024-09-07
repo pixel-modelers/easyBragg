@@ -36,14 +36,15 @@ Note, use conda to activate the env.
 
 ### Part 3: Download sources and build
 
-Note, build uses `cmake` which can be installed in the conda environment, or with [homebrew](https://formulae.brew.sh/formula/cmake) if using mac. 
+Note, build uses `cmake`. If its not already in your path, simply install it with mamba: 
 
 ```
 mamba install cmake
 ```
 
-For CUDA builders, set up the [typical CUDA env](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#environment-setup), and ensure nvcc is in your path.
+It can also be installed with [homebrew](https://formulae.brew.sh/formula/cmake) if using a Mac. 
 
+For CUDA builders, set up the [typical CUDA env](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#environment-setup), and ensure nvcc is in your path:
 
 <details>
   <summary>`typical_cuda_setup.sh`</summary>
@@ -56,7 +57,7 @@ export LD_LIBRARY_PATH=${CUDA_HOME}/lib64
 ```
 </details>
 
-Then get the sources and install. 
+Then get the sources and install:
 
 ```
 git clone --recurse-submodules https://github.com/pixel-modelers/easyBragg.git
