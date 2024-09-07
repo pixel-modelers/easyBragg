@@ -21,7 +21,7 @@ Note there is also an x86_64 version of mamba for M1. If you use this, you will 
 
 ```
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash ./Miniforge3-MacOSX-arm64.sh -b -u -p $PWD/simforge
+bash ./Miniforge3-Linux-x86_64.sh -b -u -p $PWD/simforge
 source simforge/etc/profile.d/conda.sh 
 ```
 
@@ -74,8 +74,7 @@ To use the env, for now, use PYTHONPATH
 export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 ```
 
-where `$EASYBRAGG` should be the absolute path to the `easyBragg` repository. 
-
+where `$EASYBRAGG` should be the absolute path to the `easyBragg` repository.
 
 Note, at each fresh login one should activate the simtbx env and set `PYTHONPATH`. For that, create an env script:
 
