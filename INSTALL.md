@@ -1,6 +1,19 @@
 # easyBragg
-An east-to-build version of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
 
+<center>
+
+----
+**An east-to-build version of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.**
+
+[Installation instructions](#installing)
+
+[Testing the build](#testing_easybragg)
+
+----
+
+</center>
+
+<a name="installing"></a>
 # Install
 
 This has been tested on Debian 12 (bookworm), SUSE 15.4, and Sonoma 14.5 (Apple M1).
@@ -117,6 +130,7 @@ For folks using the x86_64 conda packages on an M1 mac, try
 cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
 ```
 
+<a name="testing_easybragg"></a>
 ### Testing the build
 
 
