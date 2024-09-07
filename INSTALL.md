@@ -1,11 +1,19 @@
 # easyBragg
-An easy install of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
+An east-to-build version of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.
 
 # Install
 
-This has been tested on Debian 12 (bookworm), SUSE 15, and Sonomo 14 (Apple M1).
+This has been tested on Debian 12 (bookworm), SUSE 15.4, and Sonoma 14.5 (Apple M1).
 
 ### Part 1: Download mamba
+
+##### mamba Linux:
+
+```
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash ./Miniforge3-Linux-x86_64.sh -b -u -p $PWD/simforge
+source simforge/etc/profile.d/conda.sh 
+```
 
 ##### mamba for M1 Mac:
 
@@ -16,14 +24,6 @@ source simforge/etc/profile.d/conda.sh
 ```
 
 Note there is also an x86_64 version of mamba for M1. If you use this, you will need to set a special cmake flag below. 
-
-##### mamba Linux:
-
-```
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash ./Miniforge3-Linux-x86_64.sh -b -u -p $PWD/simforge
-source simforge/etc/profile.d/conda.sh 
-```
 
 ### Part 2: Get cctbx, dxtbx, and boost headers
 
@@ -96,18 +96,20 @@ Hence, at login run `source /path/to/setup_ezbragg.sh`.
 
 ### Install notes
 
-For folks who dont only use conda (not mamba), try installing in steps, as dependency resolution seems faster that way:
+If dependency resolution is slow (this is more likely to happen when using conda as opposed to mamba), try installing in steps:
 
 ```
 conda create -n conda-forge::cctbx-base python=3.9 -y
 conda install conda-forge::dxtbx -y
 ```
 
-One can try using the cctbx/boost headers as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel`. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
+One can also try using the cctbx/boost headers provided as a submodule in this repo as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel` packages. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
 
 ```
 cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
 ```
+
+Not simtbx_boost should currently be linked to version 1.84.
 
 For folks using the x86_64 conda packages on an M1 mac, try
 
