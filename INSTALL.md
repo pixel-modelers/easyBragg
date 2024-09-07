@@ -109,7 +109,7 @@ One can also try using the cctbx/boost headers provided as a submodule in this r
 cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
 ```
 
-Not simtbx_boost should currently be linked to version 1.84.
+Note, the `simtbx_boost` submodule is currently linked to version 1.84.
 
 For folks using the x86_64 conda packages on an M1 mac, try
 
