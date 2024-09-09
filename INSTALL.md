@@ -17,7 +17,7 @@
 <a name="installing"></a>
 # Install
 
-This has been tested on Debian 12 (bookworm), SUSE 15.4, and Sonoma 14.5 (Apple M1).
+This has been tested on Debian 12 (bookworm), SUSE 15.4, Redhat 8.6, and Sonoma 14.5 (Apple M1).
 
 ### Part 1: Download mamba
 
@@ -29,7 +29,7 @@ bash ./Miniforge3-Linux-x86_64.sh -b -u -p $PWD/simforge
 source simforge/etc/profile.d/conda.sh 
 ```
 
-##### mamba for M1 Mac:
+##### mamba for OSX (ARM64):
 
 ```
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
@@ -37,18 +37,68 @@ bash ./Miniforge3-MacOSX-arm64.sh -b -u -p $PWD/simforge
 source simforge/etc/profile.d/conda.sh 
 ```
 
-Note there is also an x86_64 version of mamba for M1. If you use this, you will need to set a special cmake flag below. 
+Note there is also an x86_64 version of mamba that can be installed on macs. If you use this on arm64 macs (M1 etc.), then you will need to set a special cmake flag (see below). 
 
-### Part 2: Get cctbx, dxtbx, and boost headers
+##### mamba for PowerPC (PPC64)
+
+```
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-ppc64le.sh
+bash ./Miniforge3-Linux-ppc64le.sh -b -u -p $PWD/simforge
+source simforge/etc/profile.d/conda.sh
+```
+
+### Part 2: Get cctbx-base, dxtbx, and boost headers
+
+Note, after creating the `simtbx` environment below, use `conda activate simtbx` to activate it, despite the message that says to use `mamba activate simtbx`.
+
+##### Linux64, OSX x86_64, ARM64 users:
+
+The environment is fully supported by conda, so simply install:
 
 ```
 mamba create -n simtbx -c conda-forge cctbx-base libboost-devel libboost-python-devel dxtbx python=3.9 -y
 conda activate simtbx
 ```
 
-Note, use conda to activate the env.
+##### PPC64 users
 
-### Part 3: Download sources and build
+These instructions were tested on the [Summit cluster](https://en.wikipedia.org/wiki/Summit_(supercomputer)). There is no dxtbx conda package for ppc64 (yet), so you will need to build dxtbx manually. Fortunately pp64 conda packages of cctbx-base and boost exist, so begin by getting those:
+
+```
+mamba create -n simtbx -c conda-forge cctbx-base libboost-devel libboost-python-devel python=3.9 -y
+conda activate simtbx
+```
+
+Then, bring in dependencies needed for dxtbx (including a downgrade of numpy):
+
+```
+mamba install -c conda-forge pybind11 hdf5 h5py cython numpy==1.26
+pip install orderedset natsort
+wget  https://pypi.io/packages/source/p/pycbf/pycbf-0.9.6.5.tar.gz
+tar -xzvf pycbf-0.9.6.5.tar.gz
+cd pycbf-0.9.6.5
+python setup.py build
+python setup.py install
+cd ..
+```
+
+Finally clone dxtbx, and install using cmake. You might need to define a few more [cmake hints](https://cmake.org/cmake/help/latest/module/FindPython.html#hints) to help cmake find the correct python etc.
+
+```
+git clone git clone https://github.com/cctbx/dxtbx.git
+cd dxtbx
+mkdir build
+cd build
+# mamba install cmake if you dont have it
+HDF5_ROOT=$CONDA_PREFIX cmake ..
+make -j5
+make install
+cd ..
+python setup.py install
+cd ..
+```
+
+### Part 3: Download the easyBragg sources and build
 
 This build uses `cmake`. If its not already in your path, simply install it with mamba: 
 
@@ -81,9 +131,15 @@ cd build
 cmake ..
 make
 make install
+cd ..
+pip install build
+python -m build
+pip install dist/simtbx-0.1.tar.gz
 ```
 
-To use the env, for now, use PYTHONPATH
+The `make install` command will copy the extension module to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/pthon*/site-packages/`. 
+
+If `build` and/or `pip install` commands above did not work, one can simply use PYTHONPATH:
 
 ```
 export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
@@ -91,7 +147,7 @@ export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 
 where `$EASYBRAGG` should be the absolute path to the `easyBragg` repository.
 
-Note, at each fresh login one should activate the simtbx env and set `PYTHONPATH`. For that, create an env script:
+Note, at each fresh login one should activate the simtbx env (and potentially set `PYTHONPATH`). For that, create an env script:
 
 <details>
   <summary>`setup_ezbragg.sh`</summary>
@@ -101,6 +157,8 @@ SIMFORGE=/path/to/simforge
 EASYBRAGG=/path/to/easyBragg
 source $SIMFORGE/etc/profile.d/conda.sh
 conda activate simtbx
+
+# Optional depending on whether build/pip was used to install the distribution:
 export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 ```
 
@@ -108,16 +166,16 @@ Hence, at login run `source /path/to/setup_ezbragg.sh`.
 
 </details>
 
-### Install notes
+### Installation troubleshooting
 
-If dependency resolution is slow (this is more likely to happen when using conda as opposed to mamba), try installing in steps:
+**1.** If dependency resolution is slow (this is more likely to happen when using conda as opposed to mamba), try installing in steps:
 
 ```
 conda create -n conda-forge::cctbx-base python=3.9 -y
 conda install conda-forge::dxtbx -y
 ```
 
-One can also try using the cctbx/boost headers provided as a submodule in this repo as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel` packages. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
+**2.** To use the cctbx/boost headers provided as a submodule in this repo as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel` packages. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
 
 ```
 cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
@@ -125,21 +183,26 @@ cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
 
 Note, the `simtbx_boost` submodule is currently linked to version 1.84.
 
-For folks using the x86_64 conda packages on an M1 mac, try
+**3.** If using the x86_64 conda packages on an M1 mac, try:
 
 ```
 cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
 ```
 
-For non-standard CUDA install locations, use
+**4.** For non-standard CUDA install locations, use:
 
 ```
 cmake -DCUDAToolkit_ROOT=/path/to/some/cuda ..
 ```
 
+**5.** To skip the CUDA install, despite cmake finding CUDAToolkit, define NOCUDA:
+
+```
+cmake -DNOCUDA ..
+```
+
 <a name="testing_easybragg"></a>
 ### Testing the build
-
 
 Try ```python example.py``` to display a simulated pattern:
 

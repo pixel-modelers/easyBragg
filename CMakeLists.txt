@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 
 # Get Python version information
 execute_process(
@@ -33,7 +33,9 @@ set(PYNUM "${PYMAJ}${PYMIN}")
 set(PY "python${PYMAJ}.${PYMIN}")
 set(SIMTBX_PROJ "${EZBRAGG}/simtbx_project")
 set(NANOBRAGG "${SIMTBX_PROJ}/simtbx/nanoBragg")
-message(">> NANOBRAGG FOLDER: ${NANOBRAGG}")
+set(DIFFBRAGG "${SIMTBX_PROJ}/simtbx/diffBragg/src")
+message(">> NANOBRAGG SOURCE FOLDER: ${NANOBRAGG}")
+message(">> DIFFBRAGG SOURCE FOLDER: ${DIFFBRAGG}")
 message(">> SIMTBX PROJECT: ${SIMTBX_PROJ}")
 
 cmake_policy(SET CMP0074 NEW)
@@ -55,6 +57,7 @@ set(INCS
   ${CONDA}/lib/${PY}/site-packages
   ${CONDA}/include
   ${CONDA}/include/${PY}
+  ${EZBRAGG}/eigen
 )
 
 if (DEFINED SIMTBX_BOOST)
@@ -76,8 +79,12 @@ add_compile_options(
 
 add_library(nanoBragg OBJECT ${NANOBRAGG}/nanoBragg.cpp)
 add_library(nanoBragg_ext OBJECT ${NANOBRAGG}/nanoBragg_ext.cpp)
+add_library(diffBragg OBJECT ${DIFFBRAGG}/diffBragg.cpp)
+add_library(diffBragg_ext OBJECT ${DIFFBRAGG}/diffBragg_ext.cpp)
 target_include_directories(nanoBragg PRIVATE ${INCS})
 target_include_directories(nanoBragg_ext PRIVATE ${INCS})
+target_include_directories(diffBragg PRIVATE ${INCS})
+target_include_directories(diffBragg_ext PRIVATE ${INCS})
 
 # suppress compiler warnings (to see warnings, execute the build.sh script)
 add_definitions(-w)
@@ -86,6 +93,7 @@ add_definitions(-w)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_LIBRARY_SUFFIX_CXX ".so")
 add_library(simtbx_nanoBragg_ext SHARED)
+add_library(simtbx_diffBragg_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
     enable_language(CUDA)
@@ -126,12 +134,22 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
 else()
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS} "-undefined dynamic_lookup")
+    target_link_libraries(simtbx_diffBragg_ext diffBragg diffBragg_ext nanoBragg nanoBragg_ext ${LIBS} "-undefined dynamic_lookup")
   else()
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS})
+    target_link_libraries(simtbx_diffBragg_ext diffBragg diffBragg_ext ${LIBS})
   endif()
 endif()
 
 set(CMAKE_INSTALL_PREFIX "${EZBRAGG}")
 message(">> INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 install(TARGETS simtbx_nanoBragg_ext DESTINATION ext)
+install(TARGETS simtbx_diffBragg_ext DESTINATION ext)
 
+# copy extension module to site-packages
+set(PYSITE "${CONDA}/lib/python${PYMAJ}.${PYMIN}/site-packages")
+if (IS_DIRECTORY "${PYSITE}")
+  message(">> PYTHON SITE PACKAGES: ${PYSITE}")
+  install (TARGETS simtbx_nanoBragg_ext DESTINATION ${PYSITE})
+  install (TARGETS simtbx_diffBragg_ext DESTINATION ${PYSITE})
+endif()
