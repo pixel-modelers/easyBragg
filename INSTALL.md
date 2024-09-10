@@ -139,9 +139,9 @@ pip install dist/simtbx-0.1.tar.gz
 # pip install -e .
 ```
 
-The `make install` command will copy the extension modules to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/pthon*/site-packages/`. 
+The `make install` command will copy the extension modules to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/python*/site-packages/`.
 
-If `build` and/or `pip install` commands above did not work, one can simply use PYTHONPATH:
+If `python -m build` and/or `pip install` commands above did not work, one can simply use PYTHONPATH:
 
 ```
 export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
@@ -177,7 +177,7 @@ conda create -n conda-forge::cctbx-base python=3.9 -y
 conda install conda-forge::dxtbx -y
 ```
 
-**2.** To use the cctbx/boost headers provided as a submodule in this repo as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel` packages. If so, one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
+**2.** To use the cctbx/boost headers provided as a submodule in this repo as oppposed to conda-installing the `libboost-devel` and `libboost-python-devel` packages, then one only needs the conda packages `cctbx-base` and `dxtbx`. Then, at the cmake step, do 
 
 ```
 cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
@@ -185,7 +185,7 @@ cmake -DSIMTBX_BOOST=$PWD/../simtbx_boost ..
 
 Note, the `simtbx_boost` submodule is currently linked to version 1.84.
 
-**3.** If using the x86_64 conda packages on an M1 mac, try:
+**3.** If using the x86_64 conda packages on an arm64 mac, try:
 
 ```
 cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
@@ -209,7 +209,7 @@ cmake -DNOCUDA ..
 pip uninstall simtbx
 ```
 
-Note, the two submodules `simtbx_nanoBragg_ext.so` and `simtbx_diffBragg_ext.so` will remain in python site-packages. The cmake build recipe will re-install them.
+Note, after uninstalling, the two submodules `simtbx_nanoBragg_ext.so` and `simtbx_diffBragg_ext.so` will remain in python site-packages. Repeating the cmake build recipe will simply over-write them . 
 
 <a name="testing_easybragg"></a>
 ### Testing the build
