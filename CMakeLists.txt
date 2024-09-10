@@ -95,7 +95,7 @@ set(CMAKE_SHARED_LIBRARY_SUFFIX_CXX ".so")
 add_library(simtbx_nanoBragg_ext SHARED)
 add_library(simtbx_diffBragg_ext SHARED)
 
-if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
+if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
     enable_language(CUDA)
     find_library(CUDART_LIB REQUIRED NAMES cudart HINTS "${CUDAToolkit_LIBRARY_DIR}")
     message(">> CUDART library found: ${CUDART_LIB}")
