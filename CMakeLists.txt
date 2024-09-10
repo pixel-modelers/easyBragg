@@ -110,8 +110,18 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
     target_include_directories(nanoBraggCUDA PRIVATE ${INCS})
     target_include_directories(nanoBragg_cuda PRIVATE ${INCS})
     
+    add_library(diffBraggCUDA OBJECT ${DIFFBRAGG}/diffBragg_gpu_kernel.cu ${DIFFBRAGG}/diffBraggCUDA.cu)
+    target_include_directories(diffBraggCUDA PRIVATE ${INCS})
+    
     # nvcc options
     target_compile_options(nanoBraggCUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+        --compiler-options=-lstdc++
+        --compiler-options=-O3
+        --compiler-options=-fPIC
+        --expt-relaxed-constexpr
+        >)
+    
+    target_compile_options(diffBraggCUDA PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --compiler-options=-lstdc++
         --compiler-options=-O3
         --compiler-options=-fPIC
@@ -120,17 +130,22 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
 
     # cuda gencodes:
     set_target_properties(nanoBraggCUDA PROPERTIES CUDA_ARCHITECTURES "50;52;60;61;70;75;80;86;89;90")
+    set_target_properties(diffBraggCUDA PROPERTIES CUDA_ARCHITECTURES "61;70;75;80;86;89;90")
     # this silenced a warning .. not sure if its necessary though:
     set_target_properties(simtbx_nanoBragg_ext PROPERTIES CUDA_ARCHITECTURES "50;52;60;61;70;75;80;86;89;90")
+    set_target_properties(simtbx_diffBragg_ext PROPERTIES CUDA_ARCHITECTURES "61;70;75;80;86;89;90")
     
     # preprocessor macros in nanoBragg to build CUDA
     add_compile_definitions(
         HAVE_NANOBRAGG_SPOTS_CUDA=1
         CUDAREAL=double
         NANOBRAGG_HAVE_CUDA=1
+        DIFFBRAGG_HAVE_CUDA=1
     )
 
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext nanoBraggCUDA nanoBragg_cuda ${LIBS})
+    
+    target_link_libraries(simtbx_diffBragg_ext diffBragg diffBragg_ext diffBraggCUDA ${LIBS})
 else()
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS} "-undefined dynamic_lookup")
