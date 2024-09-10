@@ -5,3 +5,4 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "simtbx"
 version = "0.1"
+dependencies = ["pandas", "msgpack", "reciprocalspaceship"]
