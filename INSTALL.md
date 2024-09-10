@@ -4,7 +4,7 @@
 
 
 ----
-**An east-to-build version of simtbx nanoBragg, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) wrappers for python.**
+**An east-to-build version of simtbx, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) and diffBragg wrappers for python.**
 
 [Installation instructions](#installing)
 
@@ -135,9 +135,11 @@ cd ..
 pip install build
 python -m build
 pip install dist/simtbx-0.1.tar.gz
+# alternatively, an edit-in-place dev build:
+# pip install -e .
 ```
 
-The `make install` command will copy the extension module to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/pthon*/site-packages/`. 
+The `make install` command will copy the extension modules to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/pthon*/site-packages/`. 
 
 If `build` and/or `pip install` commands above did not work, one can simply use PYTHONPATH:
 
@@ -201,6 +203,14 @@ cmake -DCUDAToolkit_ROOT=/path/to/some/cuda ..
 cmake -DNOCUDA ..
 ```
 
+**6.** To uninstall, use
+
+```
+pip uninstall simtbx
+```
+
+Note, the two submodules `simtbx_nanoBragg_ext.so` and `simtbx_diffBragg_ext.so` will remain in python site-packages. The cmake build recipe will re-install them.
+
 <a name="testing_easybragg"></a>
 ### Testing the build
 
@@ -212,9 +222,10 @@ If you ran cmake in a CUDA environment, then you will see an additional image di
 
 ![example2](https://smb.slac.stanford.edu/~dermen/cpu_vs_gpu.png)
 
-Most of the nanoBragg tests can be run, for example:
+Most of the nanoBragg and diffBragg tests can be run, for example:
 
 ```
 python simtbx_project/simtbx/nanoBragg/tst_nanoBragg_cbf_write.py
 python simtbx_project/simtbx/nanoBragg/tst_gauss_argchk.py GPU
+python simtbx_project/simtbx/diffBragg/tests/tst_diffBragg_hopper_refine.py
 ```
