@@ -53,6 +53,16 @@ message(">> Boost libraries found: ${BOOST_LIBS}")
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
 message(">> CCTBX library found: ${CCTBX_LIB}")
 
+message(DEBUG "Looking for dxtbx build dir via importing in python")
+execute_process(COMMAND python -c "import dxtbx, pathlib; print(pathlib.Path(dxtbx.__file__).parent.resolve())"
+                RESULT_VARIABLE NO_DXTBX
+                OUTPUT_VARIABLE DXTBX_DIR
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET)
+
+message(">> DXTBX result=${NO_DXTBX} and dir=${DXTBX_DIR}")
+
+
 set(INCS
   ${SIMTBX_PROJ}
   ${CONDA}/lib/${PY}/site-packages
