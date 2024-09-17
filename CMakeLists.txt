@@ -83,12 +83,10 @@ add_library(nanoBragg OBJECT ${NANOBRAGG}/nanoBragg.cpp)
 add_library(nanoBragg_ext OBJECT ${NANOBRAGG}/nanoBragg_ext.cpp)
 add_library(diffBragg OBJECT ${DIFFBRAGG}/diffBragg.cpp ${DIFFBRAGG}/diffBragg_cpu_kernel.cpp)
 add_library(diffBragg_ext OBJECT ${DIFFBRAGG}/diffBragg_ext.cpp)
-add_library(exafel_ext OBJECT ${EXAFEL}/gpu_ext.cpp)
 target_include_directories(nanoBragg PRIVATE ${INCS})
 target_include_directories(nanoBragg_ext PRIVATE ${INCS})
 target_include_directories(diffBragg PRIVATE ${INCS})
 target_include_directories(diffBragg_ext PRIVATE ${INCS})
-target_include_directories(exafel_ext PRIVATE ${INCS})
 
 # suppress compiler warnings (to see warnings, execute the build.sh script)
 add_definitions(-w)
@@ -98,7 +96,6 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_LIBRARY_SUFFIX_CXX ".so")
 add_library(simtbx_nanoBragg_ext SHARED)
 add_library(simtbx_diffBragg_ext SHARED)
-add_library(simtbx_gpu_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
     enable_language(CUDA)
@@ -110,7 +107,6 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
         ${CUDART_LIB}
     )
 
-    # two new objects for cuda support
     add_library(nanoBraggCUDA OBJECT ${NANOBRAGG}/nanoBraggCUDA.cu)
     add_library(nanoBragg_cuda OBJECT ${NANOBRAGG}/nanoBragg_cuda.cpp)
     target_include_directories(nanoBraggCUDA PRIVATE ${INCS})
@@ -119,6 +115,9 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
     add_library(diffBraggCUDA OBJECT ${DIFFBRAGG}/diffBragg_gpu_kernel.cu ${DIFFBRAGG}/diffBraggCUDA.cu)
     target_include_directories(diffBraggCUDA PRIVATE ${INCS})
 
+    add_library(simtbx_gpu_ext SHARED)
+    add_library(exafel_ext OBJECT ${EXAFEL}/gpu_ext.cpp)
+    target_include_directories(exafel_ext PRIVATE ${INCS})
     add_library(exafel OBJECT ${EXAFEL}/detector.cu ${EXAFEL}/structure_factors.cu ${EXAFEL}/simulation.cu)
     target_include_directories(exafel PRIVATE ${INCS})
     
@@ -188,21 +187,25 @@ else()
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(LIBS
       ${LIBS}
-      "--undefined dynamic_loopkup"
+      "-undefined dynamic_lookup"
     )
   endif()
   target_link_libraries(simtbx_nanoBragg_ext nanoBragg nanoBragg_ext ${LIBS})
   target_link_libraries(simtbx_diffBragg_ext diffBragg diffBragg_ext ${LIBS})
-  target_link_libraries(simtbx_exafel_ext exafel_ext ${LIBS})
 endif()
 
 set(CMAKE_INSTALL_PREFIX "${EZBRAGG}")
 message(">> INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 set(ext_mods 
-    simtbx_nanoBragg_ext 
-    simtbx_diffBragg_ext
+  simtbx_nanoBragg_ext
+  simtbx_diffBragg_ext
+)
+if(TARGET simtbx_gpu_ext)
+  set(ext_mods
+    ${ext_mods}
     simtbx_gpu_ext
-    )
+  )
+endif()
 
 install(TARGETS ${ext_mods} DESTINATION ext)
 # copy extension module to site-packages
