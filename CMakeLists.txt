@@ -71,6 +71,15 @@ set(INCS
   ${EZBRAGG}/eigen
 )
 
+if (${NO_DXTBX} STREQUAL "0")
+    cmake_path(GET DXTBX_DIR PARENT_PATH DXTBX_INC)
+    message(">> dxtbx include=${DXTBX_INC}")
+    set(INCS
+      ${INCS}
+      ${DXTBX_INC}
+    )
+endif()
+
 if (DEFINED SIMTBX_BOOST)
     set(INCS
       ${INCS}
