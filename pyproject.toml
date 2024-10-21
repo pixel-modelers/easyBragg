@@ -6,3 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "simtbx"
 version = "0.1"
 dependencies = ["pandas", "msgpack", "reciprocalspaceship"]
+
+[project.scripts]
+make-hopper-input = "simtbx.command_line.make_input_file:main"
+hopper = "simtbx.command_line.hopper:main_call"
+view-hopper = "simtbx.command_line.shoebx:main"

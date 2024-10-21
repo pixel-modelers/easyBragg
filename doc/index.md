@@ -4,11 +4,15 @@
 
 
 ----
-**An east-to-build version of simtbx, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) and diffBragg wrappers for python.**
+**An easy-to-build version of simtbx, i.e. [nanoBragg](https://bl831.als.lbl.gov/~jamesh/nanoBragg/) and diffBragg wrappers for python.**
 
 [Installation instructions](#installing)
 
 [Testing the build](#testing_easybragg)
+
+[Adding DIALS](#adding_dials)
+
+[Simulating Laue patterns](#laue)
 
 ----
 
@@ -18,6 +22,8 @@
 # Install
 
 This has been tested on Debian 12 (bookworm), SUSE 15.4, Redhat 8.6, and Sonoma 14.5 (Apple M1).
+
+If working on a compute cluster, load all of your modules (e.g., `module load cuda`) **before** beginning installation.
 
 ### Part 1: Download mamba
 
@@ -146,27 +152,18 @@ pip install dist/simtbx-0.1.tar.gz
 
 The `make install` command will copy the extension modules to `easyBragg/ext` as well as `$CONDA_PREFIX/lib/python*/site-packages/`.
 
-If `python -m build` and/or `pip install` commands above did not work, one can simply use PYTHONPATH:
-
-```
-export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
-```
-
-where `$EASYBRAGG` should be the absolute path to the `easyBragg` repository.
-
-Note, at each fresh login one should activate the simtbx env (and potentially set `PYTHONPATH`). For that, create an env script:
+Note, at each fresh login one should activate the simtbx env. For that, create an env script:
 
 <details>
   <summary>`setup_ezbragg.sh`</summary>
 
 ```
+# if done prior to install, add module loads here, e.g.
+# module load cuda/12.0
+
 SIMFORGE=/path/to/simforge
-EASYBRAGG=/path/to/easyBragg
 source $SIMFORGE/etc/profile.d/conda.sh
 conda activate simtbx
-
-# Optional depending on whether build/pip was used to install the distribution:
-export PYTHONPATH=${EASYBRAGG}/simtbx_project:${EASYBRAGG}/ext
 ```
 
 Hence, at login run `source /path/to/setup_ezbragg.sh`.
@@ -216,6 +213,16 @@ pip uninstall simtbx
 
 Note, after uninstalling, the two extension modules `simtbx_nanoBragg_ext.so` and `simtbx_diffBragg_ext.so` will remain in python site-packages. Repeating the cmake build recipe will simply over-write them . 
 
+**7.** Install CUDAToolkit with conda
+
+To biuld against conda cuda-toolkit packages, try
+
+```
+mamba install nvidia::cudatoolkit
+```
+
+and then run cmake. This may or may not work depending on the installed GPU.
+
 <a name="testing_easybragg"></a>
 ### Testing the build
 
@@ -235,3 +242,38 @@ python simtbx_project/simtbx/nanoBragg/tst_gauss_argchk.py GPU
 python simtbx_project/simtbx/diffBragg/tests/tst_diffBragg_hopper_refine.py
 ```
 
+<a name="adding_dials"></a>
+# DIALS
+
+Unless you are on a PPC64 machine, `dials` can also be brought in with mamba:
+
+```
+mamba install conda-forge::dials
+```
+
+<a name="laue"></a>
+# Simulating Laue patterns
+
+A Python script for simulating a laue pattern can be found [here](https://gist.github.com/dermen/c727f87d768c3cb428d1a39abbe6edbb). Grab the script, along with some meta data:
+
+```
+wget https://gist.githubusercontent.com/dermen/c727f87d768c3cb428d1a39abbe6edbb/raw/36700b3013f9caa3130563f03fa3c2b67ff240c8/sim_laue_basic.py
+wget https://raw.githubusercontent.com/dermen/e080_laue/master/air.stol
+wget https://raw.githubusercontent.com/dermen/e080_laue/master/from_vukica.lam
+iotbx.fetch_pdb 7lvc
+```
+
+Then test the script with the `simtbx` env active:
+
+```
+python sim_laue_basic.py  test_laue --numimg 1 --cuda --mosDoms 1 --mosSpread 0
+```
+
+The image can be viewed using [DIALS](https://dials.github.io/) or [ADXV](https://www.scripps.edu/tainer/arvai/adxv.html):
+
+```
+mamba install conda-forge::dials
+dials.image_viewer test_laue/shot_1_00001.cbf
+```
+
+<img src="https://smb.slac.stanford.edu/~dermen/laue_pattern.png" alt="drawing" width="600"/>
