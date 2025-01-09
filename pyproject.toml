@@ -6,3 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "simtbx"
 version = "0.1"
 dependencies = ["pandas", "msgpack"]
+
+[tool.setuptools]
+script-files = ["simtbx_project/simtbx/command_line/make_input_file.py",
+                "simtbx_project/simtbx/command_line/shoebx.py",
+                "simtbx_project/simtbx/command_line/hopper.py",
+                "simtbx_project/simtbx/command_line/integrate.py"]
