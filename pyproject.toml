@@ -11,5 +11,7 @@ dependencies = ["pandas", "msgpack"]
 script-files = ["simtbx_project/simtbx/command_line/make_input_file.py",
                 "simtbx_project/simtbx/command_line/shoebx.py",
                 "simtbx_project/simtbx/command_line/hopper.py",
+                "simtbx_project/simtbx/command_line/hopper_ensemble.py",
                 "simtbx_project/simtbx/command_line/integrate.py",
+                "simtbx_project/simtbx/command_line/complete_an_F.py",
                 "simtbx_project/simtbx/command_line/geometry_refiner.py"]
