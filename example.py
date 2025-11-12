@@ -1,5 +1,10 @@
 import time
 
+from argparse import ArgumentParser
+ap = ArgumentParser()
+ap.add_argument("--skipGPU", action="store_true")
+args = ap.parse_args()
+
 import pylab as plt
 import numpy as np
 
@@ -58,7 +63,7 @@ fig.set_size_inches((4,4))
 
 has_gpu = getattr(N, "add_nanoBragg_spots_cuda") is not None
 # do a cuda image for comparison
-if has_gpu: 
+if has_gpu and not args.skipGPU: 
     N.raw_pixels *= 0
     t = time.time()
     N.add_nanoBragg_spots_cuda()
