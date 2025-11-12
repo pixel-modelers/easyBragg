@@ -45,7 +45,7 @@ tcpu = time.time()-t
 nonoise_img = N.raw_pixels.as_numpy_array()
 
 # add noise
-N.show_params()
+#N.show_params()
 N.adc_offset_adu = nonoise_img.max()*0.1
 N.add_noise()
 img = N.raw_pixels.as_numpy_array()
@@ -85,3 +85,4 @@ if not args.skipGPU":
     fig2.set_size_inches((6,3))
 
 plt.show()
+print("OK")
