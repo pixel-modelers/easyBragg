@@ -61,9 +61,11 @@ ax.imshow(img, vmax=vmax, vmin=vmin, cmap="gray_r")
 ax.set_title("noise image")
 fig.set_size_inches((4,4))
 
-has_gpu = getattr(N, "add_nanoBragg_spots_cuda") is not None
-# do a cuda image for comparison
-if has_gpu and not args.skipGPU: 
+if not args.skipGPU":
+  has_gpu = getattr(N, "add_nanoBragg_spots_cuda") is not None
+  # do a cuda image for comparison
+  if has_gpu: 
+    print("Running GPU pipeline")
     N.raw_pixels *= 0
     t = time.time()
     N.add_nanoBragg_spots_cuda()
@@ -83,4 +85,3 @@ if has_gpu and not args.skipGPU:
     fig2.set_size_inches((6,3))
 
 plt.show()
-
