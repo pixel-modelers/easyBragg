@@ -14,4 +14,8 @@ script-files = ["simtbx_project/simtbx/command_line/make_input_file.py",
                 "simtbx_project/simtbx/command_line/hopper_ensemble.py",
                 "simtbx_project/simtbx/command_line/integrate.py",
                 "simtbx_project/simtbx/command_line/complete_an_F.py",
-                "simtbx_project/simtbx/command_line/geometry_refiner.py"]
+                "simtbx_project/simtbx/command_line/geometry_refiner.py",
+                "simtbx_project/simtbx/command_line/check_mtz_coverage.py",
+                "simtbx_project/simtbx/command_line/expand_rotation_to_stills.py",
+                "simtbx_project/simtbx/command_line/make_phil.py",
+                "simtbx_project/simtbx/command_line/hopper_heatup.py"]
