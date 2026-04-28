@@ -149,6 +149,8 @@ fhklref_tst_list = [
     ["$D/diffBragg/tests/tst_diffBragg_hopper_refine_Fhkl.py", "--scale .2 --perturb G --perturb-B-aniso --auto-sigma"],
     # 10. Everything with aniso B: Fhkl + G + Nabc + aniso B + auto-sigma (multi-shot)
     ["$D/diffBragg/tests/tst_diffBragg_hopper_refine_Fhkl.py", "--scale .2 --perturb G Nabc --perturb-B-aniso --auto-sigma"],
+    # 11. Hopper->Geometry parameter propagation round-trip (30 configs)
+    "$D/diffBragg/tests/tst_hopper_geometry_propagation.py",
 ]
 
 # A quick subset for fast smoke-testing

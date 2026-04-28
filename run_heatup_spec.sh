@@ -11,7 +11,7 @@ export DIFFBRAGG_USE_CUDA=1
 NUM_DEVICES=$(echo "$CUDA_VISIBLE_DEVICES" | tr ',' '\n' | wc -l)
 WORKERS_PER_GPU=4
 MPI_PROCS=$(( NUM_DEVICES * WORKERS_PER_GPU + 1 ))
-MTZ_COLUMN="I(+),SIGI(+),I(-),SIGI(-)"
+MTZ_COLUMN="Iobs(+),SIGIobs(+),Iobs(-),SIGIobs(-)"
 BASEDIR="$SCRIPTDIR/heatups"
 # ----------------------
 
@@ -24,24 +24,25 @@ N=1; while [ -d "$WORKDIR" ]; do WORKDIR="$BASEDIR/${SPECNAME}_${N}"; N=$((N+1))
 RUN="conda run -n simtbx"
 
 # Read delta-phi from the first experiment in the spec file
-FIRST_EXPT=$(head -1 "$SPEC" | awk '{print $1}')
-DELTA_PHI=$($RUN python -c "
-from dxtbx.model import ExperimentList
-print(f'{ExperimentList.from_file(\"$FIRST_EXPT\")[0].scan.get_oscillation()[1]:.4f}')
-" 2>/dev/null)
+#FIRST_EXPT=$(head -1 "$SPEC" | awk '{print $1}')
+DELTA_PHI=0.0025
+#DELTA_PHI=$($RUN python -c "
+#from dxtbx.model import ExperimentList
+#print(f'{ExperimentList.from_file(\"$FIRST_EXPT\")[0].scan.get_oscillation()[1]:.4f}')
+#" 2>/dev/null)
 
 mkdir -p "$WORKDIR" && cd "$WORKDIR"
 
 [ -f auto_hop.phil ] || \
     make_phil.py --spec "$SPEC" \
         --mtz "$MTZ" --mtz-column "$MTZ_COLUMN" --delta-phi "$DELTA_PHI" \
-        --outdir hopper_out --estimate-G --num-devices "$NUM_DEVICES" -o auto_hop.phil
+        --outdir hopper_out --num-devices "$NUM_DEVICES" -o auto_hop_refac.phil
 
 mpirun -n "$MPI_PROCS" hopper_heatup.py \
-    auto_hop.phil --spec "$SPEC" \
+    auto_hop_refac.phil --spec "$SPEC" \
     --mpi --stages G,RotXYZ,Nabc,B,ucell --n-gpus $NUM_DEVICES \
-    --deep-dive --keep-trials -o optimized.phil --tmpdir tmp \
+    --deep-dive --keep-trials -o optimized_refac.phil --tmpdir tmp_refac \
     --max-calls 100 --deep-dive-max-calls 500 --n-nearby 1 \
-    --trials-per-worker 1 --n-shuffles 1  --tune-restraints \
+    --n-shuffles 1  --tune-restraints \
     --final-refine-max-calls 2500 --roi-fraction 0.5 --spread-roi-fraction 1  \
-    --tune-n-frames 5  --trials-per-worker 3 "$@"
+    --tune-n-frames 5  --densify 1 "$@"

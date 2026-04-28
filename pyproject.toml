@@ -11,6 +11,7 @@ dependencies = ["pandas", "msgpack"]
 script-files = ["simtbx_project/simtbx/command_line/make_input_file.py",
                 "simtbx_project/simtbx/command_line/shoebx.py",
                 "simtbx_project/simtbx/command_line/hopper.py",
+                "simtbx_project/simtbx/command_line/hopper_cycler.py",
                 "simtbx_project/simtbx/command_line/hopper_ensemble.py",
                 "simtbx_project/simtbx/command_line/integrate.py",
                 "simtbx_project/simtbx/command_line/complete_an_F.py",
@@ -18,4 +19,6 @@ script-files = ["simtbx_project/simtbx/command_line/make_input_file.py",
                 "simtbx_project/simtbx/command_line/check_mtz_coverage.py",
                 "simtbx_project/simtbx/command_line/expand_rotation_to_stills.py",
                 "simtbx_project/simtbx/command_line/make_phil.py",
-                "simtbx_project/simtbx/command_line/hopper_heatup.py"]
+                "simtbx_project/simtbx/command_line/hopper_heatup.py",
+                "simtbx_project/simtbx/command_line/hopper_predict.py",
+                "simtbx_project/simtbx/command_line/db-look.py"]
