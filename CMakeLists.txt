@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 # Get Python version information
 execute_process(
@@ -42,13 +42,16 @@ message(">> SIMTBX PROJECT: ${SIMTBX_PROJ}")
 cmake_policy(SET CMP0074 NEW)
 find_package(CUDAToolkit)
 find_library(BOOST_PY REQUIRED NAMES boost_python${PYNUM} HINTS "${CONDA}/lib")
-find_library(BOOST_SYS REQUIRED NAMES boost_system HINTS "${CONDA}/lib")
 find_library(BOOST_NP REQUIRED NAMES boost_numpy${PYNUM} HINTS "${CONDA}/lib")
+# boost_system is header-only in Boost >= 1.69, no .so needed
+find_library(BOOST_SYS NAMES boost_system HINTS "${CONDA}/lib")
 set(BOOST_LIBS
     ${BOOST_PY}
-    ${BOOST_SYS}
     ${BOOST_NP}
 )
+if (BOOST_SYS)
+    list(APPEND BOOST_LIBS ${BOOST_SYS})
+endif()
 message(">> Boost libraries found: ${BOOST_LIBS}")
 find_library(CCTBX_LIB REQUIRED NAMES cctbx HINTS "${CONDA}/lib")
 message(">> CCTBX library found: ${CCTBX_LIB}")
@@ -117,6 +120,7 @@ add_library(simtbx_nanoBragg_ext SHARED)
 add_library(simtbx_diffBragg_ext SHARED)
 
 if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --allow-unsupported-compiler")
     enable_language(CUDA)
     find_library(CUDART_LIB REQUIRED NAMES cudart HINTS "${CUDAToolkit_LIBRARY_DIR}")
     message(">> CUDART library found: ${CUDART_LIB}; Version ${CUDAToolkit_VERSION}")
@@ -180,9 +184,9 @@ if (EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}" AND NOT DEFINED NOCUDA)
         ${GPU_COMP_OPT}
         >)
 
-    # cuda gencodes:
-    set(ARCH_ALL "50;52;60;61;70;75;80;86;89;90")
-    set(ARCH_ATOMIC_DOUBLE "61;70;75;80;86;89;90")
+    # cuda gencodes (CUDA 13.x dropped compute_50/52/60/61):
+    set(ARCH_ALL "75;80;86;89;90")
+    set(ARCH_ATOMIC_DOUBLE "75;80;86;89;90")
     set_target_properties(nanoBraggCUDA PROPERTIES CUDA_ARCHITECTURES "${ARCH_ALL}")
     set_target_properties(diffBraggCUDA PROPERTIES CUDA_ARCHITECTURES "${ARCH_ATOMIC_DOUBLE}")
     set_target_properties(exafel PROPERTIES CUDA_ARCHITECTURES "${ARCH_ALL}")
