@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.2)
 project(easyBragg)
 
 set (CMAKE_CXX_STANDARD 17)
+# nvcc's default dialect varies (C++14 on CUDA 11); boost>=1.86 math needs C++17 (FLT_TRUE_MIN)
+set (CMAKE_CUDA_STANDARD 17)
+set (CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 # Get Python version information
 execute_process(
